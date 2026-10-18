@@ -1,0 +1,21 @@
+# --- Terraform ---
+# Archivos de estado y respaldos locales (¡Muy importante no subirlos por seguridad y conflictos!)
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+*.tfvars
+.terraform.lock.hcl
+
+# --- Node.js / Lambdas ---
+# Dependencias locales de las funciones Lambda
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# --- Sistema operativo y Editores ---
+# Archivos basura del sistema operativo o editores como VS Code
+.DS_Store
+Thumbs.db
+.vscode/
