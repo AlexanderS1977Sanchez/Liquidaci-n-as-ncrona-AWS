@@ -22,7 +22,7 @@
         <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
             <h2 class="text-lg font-semibold text-slate-700 mb-2">1. Configuración de Conexión</h2>
             <p class="text-xs text-slate-500 mb-3">Pega aquí la URL de tu API Gateway obtenida con Terraform (ej. https://xxx.execute-api.us-east-1.amazonaws.com)</p>
-            <input type="text" id="apiUrl" placeholder="https://tu-api-gateway-url.amazonaws.com" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-mono" value="https://7knscbss21.execute-api.us-east-1.amazonaws.com">
+            <input type="text" id="apiUrl" placeholder="https://tu-api-gateway-url.amazonaws.com" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-mono" value="https://fjhe2uxxlh.execute-api.us-east-1.amazonaws.com">
         </section>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -35,7 +35,7 @@
                     <div>
                         <label class="block text-xs font-medium text-slate-600 mb-1">ID Liquidación</label>
                         <div class="flex gap-2">
-                            <input type="text" id="id_liquidacion" class="w-full px-3 py-1.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="liq-001">
+                            <input type="text" id="id_liquidacion" oninput="actualizarPreview()" class="w-full px-3 py-1.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none font-mono" placeholder="liq-001">
                             <button onclick="generarId()" class="bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded-lg text-xs font-medium">Auto</button>
                         </div>
                     </div>
@@ -43,22 +43,22 @@
                     <div class="grid grid-cols-2 gap-2">
                         <div>
                             <label class="block text-xs font-medium text-slate-600 mb-1">ID Productor</label>
-                            <input type="text" id="id_productor" class="w-full px-3 py-1.5 border rounded-lg outline-none" value="prod-1042">
+                            <input type="text" id="id_productor" oninput="actualizarPreview()" class="w-full px-3 py-1.5 border rounded-lg outline-none" value="prod-1043">
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-slate-600 mb-1">ID Centro Acopio</label>
-                            <input type="text" id="id_centro_acopio" class="w-full px-3 py-1.5 border rounded-lg outline-none" value="acopio- norte">
+                            <input type="text" id="id_centro_acopio" oninput="actualizarPreview()" class="w-full px-3 py-1.5 border rounded-lg outline-none" value="acopio-norte">
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-2">
                         <div>
                             <label class="block text-xs font-medium text-slate-600 mb-1">Fecha Entrega</label>
-                            <input type="date" id="fecha_entrega" class="w-full px-3 py-1.5 border rounded-lg outline-none">
+                            <input type="date" id="fecha_entrega" oninput="actualizarPreview()" class="w-full px-3 py-1.5 border rounded-lg outline-none">
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-slate-600 mb-1">Producto</label>
-                            <select id="producto" class="w-full px-3 py-1.5 border rounded-lg outline-none bg-white">
+                            <select id="producto" onchange="actualizarPreview()" class="w-full px-3 py-1.5 border rounded-lg outline-none bg-white">
                                 <option value="Cafe">Café Arábigo</option>
                                 <option value="Cacao">Cacao Fino</option>
                                 <option value="Quinua">Quinua Real</option>
@@ -69,7 +69,7 @@
                     <div class="grid grid-cols-3 gap-2">
                         <div>
                             <label class="block text-xs font-medium text-slate-600 mb-1">Cant. (Kg)</label>
-                            <input type="number" id="cantidad_kg" oninput="calcularTotal()" class="w-full px-3 py-1.5 border rounded-lg outline-none" value="500">
+                            <input type="number" id="cantidad_kg" oninput="calcularTotal()" class="w-full px-3 py-1.5 border rounded-lg outline-none" value="400">
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-slate-600 mb-1">Precio/Kg ($)</label>
@@ -77,13 +77,13 @@
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-slate-600 mb-1">Descuentos ($)</label>
-                            <input type="number" id="descuentos" oninput="calcularTotal()" class="w-full px-3 py-1.5 border rounded-lg outline-none" value="10.00" step="0.01">
+                            <input type="number" id="descuentos" oninput="calcularTotal()" class="w-full px-3 py-1.5 border rounded-lg outline-none" value="10.10" step="0.01">
                         </div>
                     </div>
 
                     <div class="bg-emerald-50 p-3 rounded-lg border border-emerald-200 flex justify-between items-center">
                         <span class="text-xs font-medium text-emerald-800">Valor Estimado:</span>
-                        <span id="lbl_valor_estimado" class="text-lg font-bold text-emerald-700">$1,240.00</span>
+                        <span id="lbl_valor_estimado" class="text-lg font-bold text-emerald-700">$989.90</span>
                     </div>
 
                     <button onclick="enviarLiquidacion()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 rounded-lg shadow transition">
@@ -101,7 +101,7 @@
 
                 <div>
                     <h2 class="text-lg font-semibold text-slate-700 mb-2">Respuesta del Servidor</h2>
-                    <div id="responseBox" class="bg-slate-100 border border-slate-200 rounded-lg p-3 text-xs font-mono h-36 overflow-y-auto text-slate-600">
+                    <div id="responseBox" class="bg-slate-100 border border-slate-200 rounded-lg p-3 text-xs font-mono h-36 overflow-y-auto text-slate-600 transition-all duration-300">
                         Esperando peticiones...
                     </div>
                 </div>
@@ -121,9 +121,9 @@
 
         function obtenerDatosFormulario() {
             return {
-                id_liquidacion: document.getElementById('id_liquidacion').value,
-                id_productor: document.getElementById('id_productor').value,
-                id_centro_acopio: document.getElementById('id_centro_acopio').value,
+                id_liquidacion: document.getElementById('id_liquidacion').value.trim(),
+                id_productor: document.getElementById('id_productor').value.trim(),
+                id_centro_acopio: document.getElementById('id_centro_acopio').value.trim(),
                 fecha_entrega: document.getElementById('fecha_entrega').value,
                 producto: document.getElementById('producto').value,
                 cantidad_kg: parseFloat(document.getElementById('cantidad_kg').value) || 0,
@@ -156,7 +156,9 @@
             const url = baseUrl.endsWith('/') ? baseUrl + 'liquidaciones' : baseUrl + '/liquidaciones';
             const payload = obtenerDatosFormulario();
 
-            responseBox.innerText = "Enviando solicitud POST...";
+            // Estado cargando
+            responseBox.className = "bg-slate-100 border border-slate-300 rounded-lg p-3 text-xs font-mono h-36 overflow-y-auto text-slate-700";
+            responseBox.innerText = "Enviando solicitud POST a API Gateway...";
 
             try {
                 const startTime = performance.now();
@@ -166,16 +168,34 @@
                     body: JSON.stringify(payload)
                 });
                 const endTime = performance.now();
-                const jsonRes = await res.json();
+                const latency = (endTime - startTime).toFixed(0);
+                
+                let jsonRes;
+                try {
+                    jsonRes = await res.json();
+                } catch (e) {
+                    jsonRes = { rawResponse: "Respuesta no es un JSON válido" };
+                }
 
-                responseBox.innerText = `Estado HTTP: ${res.status} (${(endTime - startTime).toFixed(0)} ms)\n` + 
+                // Estilizado según el código de respuesta HTTP
+                if (res.ok || res.status === 202) {
+                    responseBox.className = "bg-emerald-50 border border-emerald-300 rounded-lg p-3 text-xs font-mono h-36 overflow-y-auto text-emerald-900";
+                } else if (res.status >= 400 && res.status < 500) {
+                    responseBox.className = "bg-amber-50 border border-amber-300 rounded-lg p-3 text-xs font-mono h-36 overflow-y-auto text-amber-900";
+                } else {
+                    responseBox.className = "bg-rose-50 border border-rose-300 rounded-lg p-3 text-xs font-mono h-36 overflow-y-auto text-rose-900";
+                }
+
+                responseBox.innerText = `Estado HTTP: ${res.status} ${res.statusText || ''} (${latency} ms)\n\n` + 
                                         JSON.stringify(jsonRes, null, 2);
+
             } catch (error) {
-                responseBox.innerText = "Error de conexión o CORS:\n" + error.message;
+                responseBox.className = "bg-rose-50 border border-rose-300 rounded-lg p-3 text-xs font-mono h-36 overflow-y-auto text-rose-900";
+                responseBox.innerText = "Error de red o CORS:\n" + error.message;
             }
         }
 
-        actualizarPreview();
+        calcularTotal();
     </script>
 </body>
 </html>

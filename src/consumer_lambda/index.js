@@ -10,6 +10,10 @@ exports.handler = async (event) => {
             const body = JSON.parse(record.body);
             const { id_liquidacion, cantidad_kg, precio_kg, descuentos } = body;
 
+            if (Number(precio_kg) <= 0 || Number(cantidad_kg) <= 0) {
+                throw new Error(`Datos inválidos detectados para la liquidación ${id_liquidacion}: El precio por kg y la cantidad deben ser mayores a cero.`);
+            }
+            
             // Cálculo del valor liquidado
             const valor_liquidado = (Number(cantidad_kg) * Number(precio_kg)) - Number(descuentos);
 
