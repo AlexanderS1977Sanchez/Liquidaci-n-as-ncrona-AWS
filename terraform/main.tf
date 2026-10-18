@@ -31,11 +31,11 @@ resource "aws_sqs_queue" "main_queue" {
   visibility_timeout_seconds = 30
   redrive_policy = jsonencode({
     deadLetterTargetArn = aws_sqs_queue.dlq.arn
-    maxReceiveCount     = 3
+    maxReceiveCount      = 3
   })
 }
 
-# 5. Paquetes ZIP para las Lambdas (Apunta a tus carpetas correctas)
+# 5. Paquetes ZIP para las Lambdas
 data "archive_file" "producer_zip" {
   type        = "zip"
   source_dir  = "${path.module}/../src/producer_lambda"
@@ -96,7 +96,7 @@ resource "aws_apigatewayv2_api" "http_api" {
     allow_origins = ["*"]
     allow_methods = ["POST", "OPTIONS", "GET"]
     allow_headers = ["content-type", "x-amz-date", "authorization", "x-api-key", "x-amz-security-token"]
-    max_age       = 300
+    max_age        = 300
   }
 }
 
@@ -107,9 +107,9 @@ resource "aws_apigatewayv2_stage" "default" {
 }
 
 resource "aws_apigatewayv2_integration" "lambda_integration" {
-  api_id                 = aws_apigatewayv2_api.http_api.id
-  integration_type       = "AWS_PROXY"
-  integration_uri        = aws_lambda_function.producer.invoke_arn
+  api_id                   = aws_apigatewayv2_api.http_api.id
+  integration_type         = "AWS_PROXY"
+  integration_uri          = aws_lambda_function.producer.invoke_arn
   payload_format_version = "2.0"
 }
 
