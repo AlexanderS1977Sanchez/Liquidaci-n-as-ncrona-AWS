@@ -1,5 +1,14 @@
 provider "aws" {
   region = var.aws_region
+
+  # Punto 4: Etiquetas globales aplicadas a toda la infraestructura
+  default_tags {
+    tags = {
+      Project     = "Agrolink"
+      Environment = var.environment
+      Owner       = "Jorge Sanchez"
+    }
+  }
 }
 
 # 1. Obtener el rol preexistente LabRole de AWS Academy
@@ -31,7 +40,7 @@ resource "aws_sqs_queue" "main_queue" {
   visibility_timeout_seconds = 30
   redrive_policy = jsonencode({
     deadLetterTargetArn = aws_sqs_queue.dlq.arn
-    maxReceiveCount      = 3
+    maxReceiveCount     = 3
   })
 }
 
@@ -96,7 +105,7 @@ resource "aws_apigatewayv2_api" "http_api" {
     allow_origins = ["*"]
     allow_methods = ["POST", "OPTIONS", "GET"]
     allow_headers = ["content-type", "x-amz-date", "authorization", "x-api-key", "x-amz-security-token"]
-    max_age        = 300
+    max_age       = 300
   }
 }
 
@@ -107,9 +116,9 @@ resource "aws_apigatewayv2_stage" "default" {
 }
 
 resource "aws_apigatewayv2_integration" "lambda_integration" {
-  api_id                   = aws_apigatewayv2_api.http_api.id
-  integration_type         = "AWS_PROXY"
-  integration_uri          = aws_lambda_function.producer.invoke_arn
+  api_id                 = aws_apigatewayv2_api.http_api.id
+  integration_type       = "AWS_PROXY"
+  integration_uri        = aws_lambda_function.producer.invoke_arn
   payload_format_version = "2.0"
 }
 
@@ -126,4 +135,21 @@ resource "aws_lambda_permission" "api_gw" {
   function_name = aws_lambda_function.producer.function_name
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.http_api.execution_arn}/*/*"
+}
+
+# 10. Alarma de CloudWatch para la DLQ
+resource "aws_cloudwatch_metric_alarm" "dlq_messages_alarm" {
+  alarm_name          = "agrolink-dlq-messages-alarm"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = "1"
+  metric_name         = "ApproximateNumberOfMessagesVisible"
+  namespace           = "AWS/SQS"
+  period              = "60"
+  statistic           = "Sum"
+  threshold           = "1"
+  alarm_description   = "Alarma: Hay mensajes retenidos en la DLQ debido a errores de procesamiento."
+
+  dimensions = {
+    QueueName = aws_sqs_queue.dlq.name 
+  }
 }
