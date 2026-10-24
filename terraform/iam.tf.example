@@ -1,0 +1,117 @@
+# ==========================================
+# 1. ROL Y POLÍTICA PARA EL PRODUCER LAMBDA
+# ==========================================
+resource "aws_iam_role" "producer_role" {
+  name = "agrolink-producer-role-${var.environment}"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        }
+      }
+    ]
+  })
+
+  tags = {
+    Environment = var.environment
+    Project     = "Agrolink"
+    Owner       = "Jorge Sanchez"
+  }
+}
+
+resource "aws_iam_role_policy" "producer_policy" {
+  name = "agrolink-producer-policy-${var.environment}"
+  role = aws_iam_role.producer_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "sqs:SendMessage",
+          "sqs:GetQueueAttributes"
+        ]
+        Resource = aws_sqs_queue.main_queue.arn
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ]
+        Resource = "arn:aws:logs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/agrolink-producer-${var.environment}:*"
+      }
+    ]
+  })
+}
+
+# ==========================================
+# 2. ROL Y POLÍTICA PARA EL CONSUMER LAMBDA
+# ==========================================
+resource "aws_iam_role" "consumer_role" {
+  name = "agrolink-consumer-role-${var.environment}"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        }
+      }
+    ]
+  })
+
+  tags = {
+    Environment = var.environment
+    Project     = "Agrolink"
+    Owner       = "Jorge Sanchez"
+  }
+}
+
+resource "aws_iam_role_policy" "consumer_policy" {
+  name = "agrolink-consumer-policy-${var.environment}"
+  role = aws_iam_role.consumer_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "sqs:ReceiveMessage",
+          "sqs:DeleteMessage",
+          "sqs:GetQueueAttributes"
+        ]
+        Resource = aws_sqs_queue.main_queue.arn
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "dynamodb:PutItem",
+          "dynamodb:UpdateItem",
+          "dynamodb:GetItem"
+        ]
+        Resource = aws_dynamodb_table.liquidaciones.arn
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ]
+        Resource = "arn:aws:logs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/agrolink-consumer-${var.environment}:*"
+      }
+    ]
+  })
+}

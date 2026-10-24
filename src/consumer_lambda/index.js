@@ -1,6 +1,7 @@
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const { DynamoDBDocumentClient, PutCommand } = require("@aws-sdk/lib-dynamodb");
 
+//Inicialización del cliente de DynamoDB
 const client = new DynamoDBClient({});
 const dynamo = DynamoDBDocumentClient.from(client);
 
@@ -13,7 +14,7 @@ exports.handler = async (event) => {
             if (Number(precio_kg) <= 0 || Number(cantidad_kg) <= 0) {
                 throw new Error(`Datos inválidos detectados para la liquidación ${id_liquidacion}: El precio por kg y la cantidad deben ser mayores a cero.`);
             }
-            
+
             // Cálculo del valor liquidado
             const valor_liquidado = (Number(cantidad_kg) * Number(precio_kg)) - Number(descuentos);
 

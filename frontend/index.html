@@ -4,61 +4,92 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AgroLink Andes - Liquidación de Pagos</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #faf9f6;
+        }
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+    </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen p-6">
-    <div class="max-w-4xl mx-auto space-y-6">
-        
-        <!-- Header -->
-        <header class="bg-emerald-700 text-white p-6 rounded-2xl shadow-lg flex justify-between items-center">
+<body class="text-slate-700 min-h-screen p-3 sm:p-6 md:p-10">
+
+    <div class="max-w-5xl mx-auto space-y-4 sm:space-y-6">
+
+        <!-- Header Minimalista y Responsivo -->
+        <header class="bg-white border border-emerald-100/80 p-5 sm:p-8 rounded-2xl sm:rounded-3xl shadow-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-                <h1 class="text-2xl font-bold">AgroLink Andes</h1>
-                <p class="text-emerald-100 text-sm">Sistema de Liquidación Asíncrona de Pagos a Productores</p>
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="inline-block w-2 h-2 rounded-full bg-emerald-400"></span>
+                    <span class="text-[10px] sm:text-xs font-semibold tracking-wider uppercase text-emerald-800/70">Sistema de Control</span>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-bold text-slate-800 tracking-tight">AgroLink Andes</h1>
+                <p class="text-slate-500 text-xs sm:text-sm mt-0.5">Liquidación Asíncrona de Pagos a Productores</p>
             </div>
-            <span class="bg-emerald-800 text-emerald-200 text-xs px-3 py-1 rounded-full border border-emerald-600">AWS Serverless</span>
+            <span class="bg-emerald-50 text-emerald-800 text-xs font-semibold px-3.5 py-1.5 rounded-full border border-emerald-200/60 self-start sm:self-auto">
+                AWS Serverless
+            </span>
         </header>
 
-        <!-- Configuración de API Endpoint -->
-        <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-            <h2 class="text-lg font-semibold text-slate-700 mb-2">1. Configuración de Conexión</h2>
-            <p class="text-xs text-slate-500 mb-3">Pega aquí la URL de tu API Gateway obtenida con Terraform (ej. https://xxx.execute-api.us-east-1.amazonaws.com)</p>
-            <input type="text" id="apiUrl" placeholder="https://tu-api-gateway-url.amazonaws.com" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-mono" value="https://fjhe2uxxlh.execute-api.us-east-1.amazonaws.com">
+        <!-- 1. Configuración API Gateway -->
+        <section class="bg-white p-5 sm:p-7 rounded-2xl sm:rounded-3xl border border-slate-100 shadow-xs space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">1. Configuración de Conexión</h2>
+                <span class="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100">API Gateway</span>
+            </div>
+            <p class="text-xs text-slate-500 leading-relaxed">Pega aquí la URL de tu API Gateway obtenida con Terraform (ej. https://xxx.execute-api.us-east-1.amazonaws.com)</p>
+            <input type="text" id="apiUrl" placeholder="https://tu-api-gateway-url.amazonaws.com" 
+                   class="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 bg-slate-50/70 border border-slate-200/80 rounded-xl sm:rounded-2xl focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 focus:bg-white outline-none text-xs font-mono text-slate-700 transition break-all" 
+                   value="https://fjhe2uxxlh.execute-api.us-east-1.amazonaws.com">
         </section>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
-            <!-- Formulario de Envío -->
-            <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
-                <h2 class="text-lg font-semibold text-slate-700">2. Nueva Liquidación (POST)</h2>
-                
-                <div class="space-y-3 text-sm">
+        <!-- Panel Principal a 2 Columnas (1 Columna en Celulares, 12 en Desktops) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
+
+            <!-- Columna Izquierda: Formulario (7/12) -->
+            <section class="lg:col-span-7 bg-white p-5 sm:p-8 rounded-2xl sm:rounded-3xl border border-slate-100 shadow-xs space-y-4 sm:space-y-5">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">2. Nueva Liquidación (POST)</h2>
+
+                <div class="space-y-3.5 sm:space-y-4 text-xs">
+
+                    <!-- ID Liquidación -->
                     <div>
-                        <label class="block text-xs font-medium text-slate-600 mb-1">ID Liquidación</label>
+                        <label class="block font-semibold text-slate-600 mb-1.5">ID Liquidación</label>
                         <div class="flex gap-2">
-                            <input type="text" id="id_liquidacion" oninput="actualizarPreview()" class="w-full px-3 py-1.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none font-mono" placeholder="liq-001">
-                            <button onclick="generarId()" class="bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded-lg text-xs font-medium">Auto</button>
+                            <input type="text" id="id_liquidacion" oninput="actualizarPreview()" class="w-full px-3.5 py-2.5 bg-slate-50/70 border border-slate-200/80 rounded-xl focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 focus:bg-white outline-none font-mono text-slate-800 transition" placeholder="liq-001">
+                            <button onclick="generarId()" class="bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-600 font-semibold px-4 py-2.5 rounded-xl transition text-xs shrink-0">Auto</button>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-2">
+                    <!-- ID Productor & Centro Acopio (Responsive) -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">ID Productor</label>
-                            <input type="text" id="id_productor" oninput="actualizarPreview()" class="w-full px-3 py-1.5 border rounded-lg outline-none" value="prod-1043">
+                            <label class="block font-semibold text-slate-600 mb-1.5">ID Productor</label>
+                            <input type="text" id="id_productor" oninput="actualizarPreview()" class="w-full px-3.5 py-2.5 bg-slate-50/70 border border-slate-200/80 rounded-xl focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 focus:bg-white outline-none text-slate-800 transition" value="prod-1043">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">ID Centro Acopio</label>
-                            <input type="text" id="id_centro_acopio" oninput="actualizarPreview()" class="w-full px-3 py-1.5 border rounded-lg outline-none" value="acopio-norte">
+                            <label class="block font-semibold text-slate-600 mb-1.5">ID Centro Acopio</label>
+                            <input type="text" id="id_centro_acopio" oninput="actualizarPreview()" class="w-full px-3.5 py-2.5 bg-slate-50/70 border border-slate-200/80 rounded-xl focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 focus:bg-white outline-none text-slate-800 transition" value="acopio-norte">
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-2">
+                    <!-- Fecha & Producto (Responsive) -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">Fecha Entrega</label>
-                            <input type="date" id="fecha_entrega" oninput="actualizarPreview()" class="w-full px-3 py-1.5 border rounded-lg outline-none">
+                            <label class="block font-semibold text-slate-600 mb-1.5">Fecha Entrega</label>
+                            <input type="date" id="fecha_entrega" oninput="actualizarPreview()" class="w-full px-3.5 py-2.5 bg-slate-50/70 border border-slate-200/80 rounded-xl focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 focus:bg-white outline-none text-slate-800 transition">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">Producto</label>
-                            <select id="producto" onchange="actualizarPreview()" class="w-full px-3 py-1.5 border rounded-lg outline-none bg-white">
+                            <label class="block font-semibold text-slate-600 mb-1.5">Producto</label>
+                            <select id="producto" onchange="actualizarPreview()" class="w-full px-3.5 py-2.5 bg-slate-50/70 border border-slate-200/80 rounded-xl focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 focus:bg-white outline-none text-slate-800 transition">
                                 <option value="Cafe">Café Arábigo</option>
                                 <option value="Cacao">Cacao Fino</option>
                                 <option value="Quinua">Quinua Real</option>
@@ -66,50 +97,67 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-3 gap-2">
+                    <!-- Valores Numéricos (Adaptables) -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">Cant. (Kg)</label>
-                            <input type="number" id="cantidad_kg" oninput="calcularTotal()" class="w-full px-3 py-1.5 border rounded-lg outline-none" value="400">
+                            <label class="block font-semibold text-slate-600 mb-1.5">Cant. (Kg)</label>
+                            <input type="number" id="cantidad_kg" oninput="calcularTotal()" class="w-full px-3.5 py-2.5 bg-slate-50/70 border border-slate-200/80 rounded-xl focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 focus:bg-white outline-none text-slate-800 transition" value="400">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">Precio/Kg ($)</label>
-                            <input type="number" id="precio_kg" oninput="calcularTotal()" class="w-full px-3 py-1.5 border rounded-lg outline-none" value="2.50" step="0.01">
+                            <label class="block font-semibold text-slate-600 mb-1.5">Precio/Kg ($)</label>
+                            <input type="number" id="precio_kg" oninput="calcularTotal()" class="w-full px-3.5 py-2.5 bg-slate-50/70 border border-slate-200/80 rounded-xl focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 focus:bg-white outline-none text-slate-800 transition" value="2.50" step="0.01">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">Descuentos ($)</label>
-                            <input type="number" id="descuentos" oninput="calcularTotal()" class="w-full px-3 py-1.5 border rounded-lg outline-none" value="10.10" step="0.01">
+                            <label class="block font-semibold text-slate-600 mb-1.5">Descuentos ($)</label>
+                            <input type="number" id="descuentos" oninput="calcularTotal()" class="w-full px-3.5 py-2.5 bg-slate-50/70 border border-slate-200/80 rounded-xl focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 focus:bg-white outline-none text-slate-800 transition" value="10.10" step="0.01">
                         </div>
                     </div>
 
-                    <div class="bg-emerald-50 p-3 rounded-lg border border-emerald-200 flex justify-between items-center">
-                        <span class="text-xs font-medium text-emerald-800">Valor Estimado:</span>
-                        <span id="lbl_valor_estimado" class="text-lg font-bold text-emerald-700">$989.90</span>
+                    <!-- Banner Valor Estimado Pastel -->
+                    <div class="bg-emerald-50/80 border border-emerald-100/90 p-4 rounded-xl sm:rounded-2xl flex justify-between items-center mt-3">
+                        <div>
+                            <span class="text-[10px] sm:text-[11px] font-semibold text-emerald-800/60 uppercase block">Total Calculado</span>
+                            <span class="text-xs text-emerald-800/80 font-medium">Valor Estimado</span>
+                        </div>
+                        <span id="lbl_valor_estimado" class="text-xl sm:text-2xl font-bold text-emerald-900 tracking-tight">$989.90</span>
                     </div>
 
-                    <button onclick="enviarLiquidacion()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 rounded-lg shadow transition">
+                    <!-- Botón Principal -->
+                    <button onclick="enviarLiquidacion()" class="w-full bg-emerald-800 hover:bg-emerald-900 active:bg-emerald-950 text-white font-semibold py-3 sm:py-3.5 rounded-xl sm:rounded-2xl transition shadow-xs text-xs tracking-wide mt-2">
                         Enviar Liquidación (POST)
                     </button>
                 </div>
             </section>
 
-            <!-- Consola y Vista Previa -->
-            <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between space-y-4">
-                <div>
-                    <h2 class="text-lg font-semibold text-slate-700 mb-2">3. Vista Previa del Payload (JSON)</h2>
-                    <pre id="jsonPreview" class="bg-slate-900 text-emerald-400 p-3 rounded-lg text-xs font-mono overflow-x-auto h-36"></pre>
+            <!-- Columna Derecha: Vista Previa JSON + Consola Servidor (5/12) -->
+            <section class="lg:col-span-5 flex flex-col gap-4 sm:gap-6">
+
+                <!-- Preview Payload -->
+                <div class="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-100 shadow-xs space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">3. Payload JSON</h2>
+                        <span class="text-[10px] font-mono text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">Request Body</span>
+                    </div>
+                    <pre id="jsonPreview" class="bg-slate-900 text-emerald-300 p-3.5 sm:p-4 rounded-xl sm:rounded-2xl text-[11px] sm:text-xs font-mono overflow-x-auto h-40 sm:h-44 border border-slate-800 leading-relaxed"></pre>
                 </div>
 
-                <div>
-                    <h2 class="text-lg font-semibold text-slate-700 mb-2">Respuesta del Servidor</h2>
-                    <div id="responseBox" class="bg-slate-100 border border-slate-200 rounded-lg p-3 text-xs font-mono h-36 overflow-y-auto text-slate-600 transition-all duration-300">
+                <!-- Response Box -->
+                <div class="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-100 shadow-xs space-y-3 flex-1 flex flex-col">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">Respuesta del Servidor</h2>
+                        <span class="text-[10px] font-mono text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">Response Logs</span>
+                    </div>
+                    <div id="responseBox" class="bg-slate-50 border border-slate-200/80 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 text-[11px] sm:text-xs font-mono flex-1 min-h-[150px] sm:min-h-[180px] overflow-y-auto text-slate-500 leading-relaxed break-words">
                         Esperando peticiones...
                     </div>
                 </div>
+
             </section>
 
         </div>
     </div>
 
+    <!-- MANTENIENDO 100% TU CÓDIGO Y LÓGICA JAVASCRIPT -->
     <script>
         document.getElementById('fecha_entrega').valueAsDate = new Date();
         generarId();
@@ -157,7 +205,7 @@
             const payload = obtenerDatosFormulario();
 
             // Estado cargando
-            responseBox.className = "bg-slate-100 border border-slate-300 rounded-lg p-3 text-xs font-mono h-36 overflow-y-auto text-slate-700";
+            responseBox.className = "bg-slate-100 border border-slate-300 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 text-[11px] sm:text-xs font-mono flex-1 min-h-[150px] sm:min-h-[180px] overflow-y-auto text-slate-700 break-words";
             responseBox.innerText = "Enviando solicitud POST a API Gateway...";
 
             try {
@@ -179,18 +227,18 @@
 
                 // Estilizado según el código de respuesta HTTP
                 if (res.ok || res.status === 202) {
-                    responseBox.className = "bg-emerald-50 border border-emerald-300 rounded-lg p-3 text-xs font-mono h-36 overflow-y-auto text-emerald-900";
+                    responseBox.className = "bg-emerald-50/90 border border-emerald-200 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 text-[11px] sm:text-xs font-mono flex-1 min-h-[150px] sm:min-h-[180px] overflow-y-auto text-emerald-950 break-words";
                 } else if (res.status >= 400 && res.status < 500) {
-                    responseBox.className = "bg-amber-50 border border-amber-300 rounded-lg p-3 text-xs font-mono h-36 overflow-y-auto text-amber-900";
+                    responseBox.className = "bg-amber-50/90 border border-amber-200 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 text-[11px] sm:text-xs font-mono flex-1 min-h-[150px] sm:min-h-[180px] overflow-y-auto text-amber-950 break-words";
                 } else {
-                    responseBox.className = "bg-rose-50 border border-rose-300 rounded-lg p-3 text-xs font-mono h-36 overflow-y-auto text-rose-900";
+                    responseBox.className = "bg-rose-50/90 border border-rose-200 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 text-[11px] sm:text-xs font-mono flex-1 min-h-[150px] sm:min-h-[180px] overflow-y-auto text-rose-950 break-words";
                 }
 
                 responseBox.innerText = `Estado HTTP: ${res.status} ${res.statusText || ''} (${latency} ms)\n\n` + 
                                         JSON.stringify(jsonRes, null, 2);
 
             } catch (error) {
-                responseBox.className = "bg-rose-50 border border-rose-300 rounded-lg p-3 text-xs font-mono h-36 overflow-y-auto text-rose-900";
+                responseBox.className = "bg-rose-50/90 border border-rose-200 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 text-[11px] sm:text-xs font-mono flex-1 min-h-[150px] sm:min-h-[180px] overflow-y-auto text-rose-950 break-words";
                 responseBox.innerText = "Error de red o CORS:\n" + error.message;
             }
         }

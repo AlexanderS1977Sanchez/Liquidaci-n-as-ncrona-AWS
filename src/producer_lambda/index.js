@@ -1,22 +1,33 @@
 const { SQSClient, SendMessageCommand } = require("@aws-sdk/client-sqs");
+
+
 const sqs = new SQSClient({});
+
 
 outputs = {};
 exports.handler = async (event) => {
+
+
     try {
         if (!event.body) {
             return { statusCode: 400, body: JSON.stringify({ error: "Cuerpo de solicitud vacío" }) };
         }
 
         const data = JSON.parse(event.body);
-        
-        // Validación básica de campos requeridos según el diccionario de datos
+    
+        // Validación estricta de campos requeridos y que no estén vacíos
         const requiredFields = ["id_liquidacion", "id_productor", "id_centro_acopio", "fecha_entrega", "producto", "cantidad_kg", "precio_kg", "descuentos"];
+
         for (let field of requiredFields) {
-            if (data[field] === undefined) {
-                return { statusCode: 400, body: JSON.stringify({ error: `Falta el campo obligatorio: ${field}` }) };
-            }
+            if (data[field] === undefined || data[field] === null || (typeof data[field] === "string" && data[field].trim() === "")) {
+                return { 
+                    statusCode: 400, 
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ error: `El campo '${field}' es obligatorio y no puede estar vacío` }) 
+                };
+            } 
         }
+        
 
         const params = {
             QueueUrl: process.env.QUEUE_URL,

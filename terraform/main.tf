@@ -61,6 +61,7 @@ resource "aws_lambda_function" "producer" {
   filename         = data.archive_file.producer_zip.output_path
   function_name    = "agrolink-producer-${var.environment}"
   role            = data.aws_iam_role.lab_role.arn
+  #role             = aws_iam_role.producer_role.arn
   handler          = "index.handler"
   runtime          = "nodejs18.x"
   source_code_hash = data.archive_file.producer_zip.output_base64sha256
@@ -77,6 +78,7 @@ resource "aws_lambda_function" "consumer" {
   filename         = data.archive_file.consumer_zip.output_path
   function_name    = "agrolink-consumer-${var.environment}"
   role            = data.aws_iam_role.lab_role.arn
+  #role             = aws_iam_role.consumer_role.arn
   handler          = "index.handler"
   runtime          = "nodejs18.x"
   source_code_hash = data.archive_file.consumer_zip.output_base64sha256
