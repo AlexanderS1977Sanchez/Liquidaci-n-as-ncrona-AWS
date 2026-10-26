@@ -160,8 +160,21 @@ Calculated using the official **AWS Pricing Calculator** (`us-east-1` region) ba
    git clone https://github.com/AlexanderS1977Sanchez/Liquidaci-n-as-ncrona-AWS.git
    cd AgroLink-Andes
    ```
+2. **Install Backend Lambda Dependencies (Node.js)**
+Navega a cada carpeta de las funciones Lambda e instala sus respectivos módulos de SDK de AWS:
+    ```bash
+   # Para la Lambda Producer
+   cd src/producer_lambda
+   npm init -y
+   npm install @aws-sdk/client-sqs
 
-2. **Initialize & Apply Infrastructure:**
+   # Para la Lambda Consumer
+   cd ../consumer_lambda
+   npm init -y
+   npm install @aws-sdk/client-dynamodb @aws-sdk/lib-dynamodb
+    ```
+
+3. **Initialize & Apply Infrastructure:**
    ```bash
    1. aws sso login 
    2. Enter AWS credentials
@@ -175,7 +188,7 @@ Calculated using the official **AWS Pricing Calculator** (`us-east-1` region) ba
    6. terraform apply    
    ```
 
-3. **Run Load Test Suite:**
+4. **Run Load Test Suite:**
    ```bash
    cd ..
    pip install httpx
