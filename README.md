@@ -161,7 +161,7 @@ Calculated using the official **AWS Pricing Calculator** (`us-east-1` region) ba
    cd AgroLink-Andes
    ```
 2. **Install Backend Lambda Dependencies (Node.js)**
-Navega a cada carpeta de las funciones Lambda e instala sus respectivos módulos de SDK de AWS:
+Navigate to each Lambda function folder and install its respective AWS SDK modules:
     ```bash
    # Para la Lambda Producer
    cd src/producer_lambda
