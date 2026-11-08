@@ -7,10 +7,7 @@ terraform {
     }
   }
   
-  backend "s3" {
-    bucket       = "agrolink-terraform-state-362040073178"
-    key          = "liquidaciones/terraform.tfstate"
-    region       = "us-east-1"
-    use_lockfile = true
+  backend "local" {
+    path = "terraform.tfstate"
   }
 }

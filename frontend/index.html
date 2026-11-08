@@ -1,172 +1,415 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgroLink Andes - Liquidación de Pagos</title>
-    <!-- Tailwind CSS CDN -->
+    <title>AgroLink Andes - Portal de Liquidaciones</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Fonts -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
     <style>
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: #faf9f6;
         }
-        .font-mono {
-            font-family: 'JetBrains Mono', monospace;
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f0ec;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d4d2cb;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a3a096;
         }
     </style>
 </head>
-<body class="text-slate-700 min-h-screen p-3 sm:p-6 md:p-10">
+<body class="text-slate-700 min-h-full flex flex-col selection:bg-emerald-100 selection:text-emerald-900">
 
-    <div class="max-w-5xl mx-auto space-y-4 sm:space-y-6">
+    <!-- Toast / Custom Notification Banner -->
+    <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
 
-        <!-- Header Minimalista y Responsivo -->
-        <header class="bg-white border border-emerald-100/80 p-5 sm:p-8 rounded-2xl sm:rounded-3xl shadow-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-                <div class="flex items-center gap-2 mb-1">
-                    <span class="inline-block w-2 h-2 rounded-full bg-emerald-400"></span>
-                    <span class="text-[10px] sm:text-xs font-semibold tracking-wider uppercase text-emerald-800/70">Sistema de Control</span>
+    <!-- Main Wrapper -->
+    <div class="max-w-6xl w-full mx-auto p-4 sm:p-6 md:p-8 flex-1 flex flex-col space-y-6">
+
+        <!-- Top Header Navigation & Branding -->
+        <header class="bg-white border border-emerald-100/80 p-5 sm:p-8 rounded-3xl shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative overflow-hidden">
+            <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-emerald-50 rounded-full blur-2xl pointer-events-none"></div>
+            
+            <div class="flex items-center gap-4 relative z-10">
+                <div class="w-12 h-12 sm:w-14 sm:h-14 bg-emerald-800 rounded-2xl flex items-center justify-center text-white shadow-md shadow-emerald-800/20 shrink-0">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                    </svg>
                 </div>
-                <h1 class="text-2xl sm:text-3xl font-bold text-slate-800 tracking-tight">AgroLink Andes</h1>
-                <p class="text-slate-500 text-xs sm:text-sm mt-0.5">Liquidación Asíncrona de Pagos a Productores</p>
+                <div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span class="text-[11px] font-semibold tracking-wider uppercase text-emerald-800/70">Plataforma Agropecuaria Andina</span>
+                    </div>
+                    <h1 class="text-2xl sm:text-3xl font-bold text-slate-800 tracking-tight">AgroLink Andes</h1>
+                    <p class="text-slate-500 text-xs sm:text-sm mt-0.5">Gestión de Liquidaciones y Trazabilidad de Pagos a Productores</p>
+                </div>
             </div>
-            <span class="bg-emerald-50 text-emerald-800 text-xs font-semibold px-3.5 py-1.5 rounded-full border border-emerald-200/60 self-start sm:self-auto">
-                AWS Serverless
-            </span>
+
+            <!-- Navegación por Pestañas Principales en Header / Barra -->
+            <div class="flex items-center gap-2 bg-slate-100/80 p-1.5 rounded-2xl border border-slate-200/60 relative z-10 w-full md:w-auto justify-center">
+                <button onclick="switchTab('negocio')" id="tabBtn-negocio" class="flex-1 md:flex-initial px-4 py-2.5 rounded-xl font-semibold text-xs transition bg-white text-emerald-900 shadow-xs flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4 text-emerald-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                    Panel de Negocio
+                </button>
+                <button onclick="switchTab('tecnica')" id="tabBtn-tecnica" class="flex-1 md:flex-initial px-4 py-2.5 rounded-xl font-semibold text-xs transition text-slate-600 hover:text-slate-900 flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                    Consola Técnica / AWS
+                </button>
+            </div>
         </header>
 
-        <!-- 1. Configuración API Gateway -->
-        <section class="bg-white p-5 sm:p-7 rounded-2xl sm:rounded-3xl border border-slate-100 shadow-xs space-y-3">
-            <div class="flex flex-wrap items-center justify-between gap-2">
-                <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">1. Configuración de Conexión</h2>
-                <span class="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100">API Gateway</span>
-            </div>
-            <p class="text-xs text-slate-500 leading-relaxed">Pega aquí la URL de tu API Gateway obtenida con Terraform (ej. https://xxx.execute-api.us-east-1.amazonaws.com)</p>
-            <input type="text" id="apiUrl" placeholder="https://tu-api-gateway-url.amazonaws.com" 
-                   class="w-full px-3.5 sm:px-4 py-2.5 sm:py-3 bg-slate-50/70 border border-slate-200/80 rounded-xl sm:rounded-2xl focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 focus:bg-white outline-none text-xs font-mono text-slate-700 transition break-all" 
-                   value="https://fjhe2uxxlh.execute-api.us-east-1.amazonaws.com">
-        </section>
+        <!-- ========================================== -->
+        <!-- PESTAÑA 1: PANEL DE NEGOCIO (USUARIO FINAL) -->
+        <!-- ========================================== -->
+        <div id="tabContent-negocio" class="space-y-6">
 
-        <!-- Panel Principal a 2 Columnas (1 Columna en Celulares, 12 en Desktops) -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
-
-            <!-- Columna Izquierda: Formulario (7/12) -->
-            <section class="lg:col-span-7 bg-white p-5 sm:p-8 rounded-2xl sm:rounded-3xl border border-slate-100 shadow-xs space-y-4 sm:space-y-5">
-                <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">2. Nueva Liquidación (POST)</h2>
-
-                <div class="space-y-3.5 sm:space-y-4 text-xs">
-
-                    <!-- ID Liquidación -->
+            <!-- KPIs de Negocio -->
+            <section class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-xs flex items-center justify-between">
                     <div>
-                        <label class="block font-semibold text-slate-600 mb-1.5">ID Liquidación</label>
-                        <div class="flex gap-2">
-                            <input type="text" id="id_liquidacion" oninput="actualizarPreview()" class="w-full px-3.5 py-2.5 bg-slate-50/70 border border-slate-200/80 rounded-xl focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 focus:bg-white outline-none font-mono text-slate-800 transition" placeholder="liq-001">
-                            <button onclick="generarId()" class="bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-600 font-semibold px-4 py-2.5 rounded-xl transition text-xs shrink-0">Auto</button>
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Liquidado (Historial)</span>
+                        <h3 id="statTotalMonto" class="text-2xl font-bold text-slate-800 mt-1">$0.00</h3>
+                    </div>
+                    <div class="w-12 h-12 bg-emerald-50 text-emerald-700 rounded-2xl flex items-center justify-center font-bold">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-xs flex items-center justify-between">
+                    <div>
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Kilos de Cosecha Acopiados</span>
+                        <h3 id="statTotalKilos" class="text-2xl font-bold text-slate-800 mt-1">0 Kg</h3>
+                    </div>
+                    <div class="w-12 h-12 bg-amber-50 text-amber-700 rounded-2xl flex items-center justify-center font-bold">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-xs flex items-center justify-between">
+                    <div>
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Liquidaciones Exitosas</span>
+                        <h3 id="statTotalEntregas" class="text-2xl font-bold text-slate-800 mt-1">0</h3>
+                    </div>
+                    <div class="w-12 h-12 bg-blue-50 text-blue-700 rounded-2xl flex items-center justify-center font-bold">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Grid Principal del Usuario: Formulario de Nueva Entrega & Historial Reciente -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+                <!-- Formulario de Negocio (7/12) -->
+                <div class="lg:col-span-7 bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-xs space-y-5">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-base font-bold text-slate-800">Registrar Nueva Cosecha y Pago</h2>
+                            <p class="text-xs text-slate-500 mt-0.5">Complete los datos de la entrega recibida en el centro de acopio.</p>
+                        </div>
+                        <span class="bg-emerald-50 text-emerald-800 text-[11px] font-semibold px-3 py-1 rounded-full border border-emerald-200/60">
+                            Nuevo Registro
+                        </span>
+                    </div>
+
+                    <div class="space-y-4 text-xs pt-2">
+                        <!-- ID Liquidación -->
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1.5">Código de Liquidación</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="id_liquidacion" oninput="actualizarPreview()" class="w-full px-4 py-3 bg-slate-50/70 border border-slate-200/80 rounded-2xl focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 focus:bg-white outline-none font-mono text-slate-800 transition" placeholder="liq-001">
+                                <button onclick="generarId()" class="bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 font-semibold px-4 py-3 rounded-2xl transition text-xs shrink-0 flex items-center gap-1.5">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                                    Generar Código
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Productor y Centro de Acopio -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1.5">Cédula o ID del Productor</label>
+                                <input type="text" id="id_productor" oninput="actualizarPreview()" class="w-full px-4 py-3 bg-slate-50/70 border border-slate-200/80 rounded-2xl focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 focus:bg-white outline-none text-slate-800 transition" value="prod-1043">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1.5">Centro de Acopio</label>
+                                <select id="id_centro_acopio" onchange="actualizarPreview()" class="w-full px-4 py-3 bg-slate-50/70 border border-slate-200/80 rounded-2xl focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 focus:bg-white outline-none text-slate-800 transition">
+                                    <option value="acopio-norte">Acopio Norte (Andes Centrales)</option>
+                                    <option value="acopio-sur">Acopio Sur (Valle Verde)</option>
+                                    <option value="acopio-oriente">Acopio Oriente (Tierras Altas)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Fecha y Tipo de Producto -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1.5">Fecha de Entrega</label>
+                                <input type="date" id="fecha_entrega" oninput="actualizarPreview()" class="w-full px-4 py-3 bg-slate-50/70 border border-slate-200/80 rounded-2xl focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 focus:bg-white outline-none text-slate-800 transition">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1.5">Tipo de Producto</label>
+                                <select id="producto" onchange="actualizarPreview(); actualizarPrecioSugerido();" class="w-full px-4 py-3 bg-slate-50/70 border border-slate-200/80 rounded-2xl focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 focus:bg-white outline-none text-slate-800 transition">
+                                    <option value="Cafe">Café Arábigo Especial</option>
+                                    <option value="Cacao">Cacao Fino de Aroma</option>
+                                    <option value="Quinua">Quinua Real Orgánica</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Cantidad, Precio y Descuentos -->
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1.5">Cantidad (Kg)</label>
+                                <input type="number" id="cantidad_kg" oninput="calcularTotal()" class="w-full px-4 py-3 bg-slate-50/70 border border-slate-200/80 rounded-2xl focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 focus:bg-white outline-none text-slate-800 transition" value="400" min="1">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1.5">Precio x Kg ($)</label>
+                                <input type="number" id="precio_kg" oninput="calcularTotal()" class="w-full px-4 py-3 bg-slate-50/70 border border-slate-200/80 rounded-2xl focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 focus:bg-white outline-none text-slate-800 transition" value="2.50" step="0.01" min="0">
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1.5">Deducciones ($)</label>
+                                <input type="number" id="descuentos" oninput="calcularTotal()" class="w-full px-4 py-3 bg-slate-50/70 border border-slate-200/80 rounded-2xl focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 focus:bg-white outline-none text-slate-800 transition" value="10.10" step="0.01" min="0">
+                            </div>
+                        </div>
+
+                        <!-- Tarjeta Total a Pagar -->
+                        <div class="bg-gradient-to-br from-emerald-50 to-teal-50/80 border border-emerald-100 p-5 rounded-2xl flex justify-between items-center mt-2">
+                            <div>
+                                <span class="text-[11px] font-bold text-emerald-800/80 uppercase tracking-wider block">Total Neto a Pagar al Productor</span>
+                                <span class="text-xs text-emerald-700/80 font-medium">Calculado: (Cantidad × Precio) - Deducciones</span>
+                            </div>
+                            <span id="lbl_valor_estimado" class="text-2xl sm:text-3xl font-extrabold text-emerald-900 tracking-tight">$989.90</span>
+                        </div>
+
+                        <!-- Botón Enviar Pago -->
+                        <button onclick="enviarLiquidacion()" id="btnEnviar" class="w-full bg-emerald-800 hover:bg-emerald-900 active:bg-emerald-950 text-white font-semibold py-4 rounded-2xl transition shadow-md shadow-emerald-800/20 text-xs sm:text-sm tracking-wide mt-2 flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            Procesar y Emitir Liquidación de Pago
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Historial Reciente de Entregas (5/12) -->
+                <div class="lg:col-span-5 bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-xs flex flex-col justify-between space-y-4">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-base font-bold text-slate-800">Historial Reciente</h2>
+                            <button onclick="cargarHistorialLocal()" class="text-xs text-emerald-800 font-semibold hover:underline">Actualizar</button>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-4">Últimas liquidaciones procesadas y guardadas localmente en este dispositivo.</p>
+                        
+                        <!-- Lista de Historial -->
+                        <div id="listaHistorialNegocio" class="space-y-3 max-h-[380px] overflow-y-auto pr-1">
+                            <!-- Inyectado por JS -->
                         </div>
                     </div>
 
-                    <!-- ID Productor & Centro Acopio (Responsive) -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <label class="block font-semibold text-slate-600 mb-1.5">ID Productor</label>
-                            <input type="text" id="id_productor" oninput="actualizarPreview()" class="w-full px-3.5 py-2.5 bg-slate-50/70 border border-slate-200/80 rounded-xl focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 focus:bg-white outline-none text-slate-800 transition" value="prod-1043">
-                        </div>
-                        <div>
-                            <label class="block font-semibold text-slate-600 mb-1.5">ID Centro Acopio</label>
-                            <input type="text" id="id_centro_acopio" oninput="actualizarPreview()" class="w-full px-3.5 py-2.5 bg-slate-50/70 border border-slate-200/80 rounded-xl focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 focus:bg-white outline-none text-slate-800 transition" value="acopio-norte">
-                        </div>
+                    <div class="pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+                        <span>Almacenamiento Local Seguro</span>
+                        <button onclick="limpiarHistorial()" class="text-rose-600 hover:underline">Borrar Historial</button>
                     </div>
+                </div>
 
-                    <!-- Fecha & Producto (Responsive) -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <label class="block font-semibold text-slate-600 mb-1.5">Fecha Entrega</label>
-                            <input type="date" id="fecha_entrega" oninput="actualizarPreview()" class="w-full px-3.5 py-2.5 bg-slate-50/70 border border-slate-200/80 rounded-xl focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 focus:bg-white outline-none text-slate-800 transition">
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- PESTAÑA 2: CONSOLA TÉCNICA / AWS         -->
+        <!-- ========================================== -->
+        <div id="tabContent-tecnica" class="space-y-6 hidden">
+            
+            <!-- Simulador de Carga Automática (Cada 2 segundos) -->
+            <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-700 relative overflow-hidden space-y-6">
+                <div class="absolute -right-16 -top-16 w-56 h-56 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10">
+                    <div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <span id="simuladorIndicator" class="inline-block w-2.5 h-2.5 rounded-full bg-slate-500"></span>
+                            <span class="text-[11px] font-mono text-emerald-400 tracking-wider uppercase font-semibold">Simulador de Tráfico Asíncrono AWS</span>
                         </div>
-                        <div>
-                            <label class="block font-semibold text-slate-600 mb-1.5">Producto</label>
-                            <select id="producto" onchange="actualizarPreview()" class="w-full px-3.5 py-2.5 bg-slate-50/70 border border-slate-200/80 rounded-xl focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 focus:bg-white outline-none text-slate-800 transition">
-                                <option value="Cafe">Café Arábigo</option>
-                                <option value="Cacao">Cacao Fino</option>
-                                <option value="Quinua">Quinua Real</option>
-                            </select>
-                        </div>
+                        <h2 class="text-xl font-bold text-white tracking-tight">Generador Automático de Peticiones (Cada 2s)</h2>
+                        <p class="text-slate-400 text-xs mt-1 max-w-xl">Envía solicitudes de prueba automáticas al API Gateway utilizando datos aleatorios realistas de café, cacao y quinua sin saturar la red.</p>
                     </div>
-
-                    <!-- Valores Numéricos (Adaptables) -->
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div>
-                            <label class="block font-semibold text-slate-600 mb-1.5">Cant. (Kg)</label>
-                            <input type="number" id="cantidad_kg" oninput="calcularTotal()" class="w-full px-3.5 py-2.5 bg-slate-50/70 border border-slate-200/80 rounded-xl focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 focus:bg-white outline-none text-slate-800 transition" value="400">
-                        </div>
-                        <div>
-                            <label class="block font-semibold text-slate-600 mb-1.5">Precio/Kg ($)</label>
-                            <input type="number" id="precio_kg" oninput="calcularTotal()" class="w-full px-3.5 py-2.5 bg-slate-50/70 border border-slate-200/80 rounded-xl focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 focus:bg-white outline-none text-slate-800 transition" value="2.50" step="0.01">
-                        </div>
-                        <div>
-                            <label class="block font-semibold text-slate-600 mb-1.5">Descuentos ($)</label>
-                            <input type="number" id="descuentos" oninput="calcularTotal()" class="w-full px-3.5 py-2.5 bg-slate-50/70 border border-slate-200/80 rounded-xl focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 focus:bg-white outline-none text-slate-800 transition" value="10.10" step="0.01">
-                        </div>
+                    
+                    <div class="flex items-center gap-3 w-full md:w-auto">
+                        <button id="btnSimulador" onclick="toggleSimulador()" class="flex-1 md:flex-initial bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-semibold px-6 py-3 rounded-2xl transition text-xs shadow-lg shadow-emerald-900/40 flex items-center justify-center gap-2">
+                            <svg id="simuladorIcon" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <span id="simuladorBtnText">Iniciar Simulador (2s)</span>
+                        </button>
                     </div>
+                </div>
 
-                    <!-- Banner Valor Estimado Pastel -->
-                    <div class="bg-emerald-50/80 border border-emerald-100/90 p-4 rounded-xl sm:rounded-2xl flex justify-between items-center mt-3">
-                        <div>
-                            <span class="text-[10px] sm:text-[11px] font-semibold text-emerald-800/60 uppercase block">Total Calculado</span>
-                            <span class="text-xs text-emerald-800/80 font-medium">Valor Estimado</span>
-                        </div>
-                        <span id="lbl_valor_estimado" class="text-xl sm:text-2xl font-bold text-emerald-900 tracking-tight">$989.90</span>
+                <!-- Estadísticas del Simulador -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2 relative z-10 border-t border-slate-700/80">
+                    <div class="bg-slate-800/80 border border-slate-700/60 p-4 rounded-2xl">
+                        <span class="text-[10px] uppercase font-mono text-slate-400 block">Peticiones Enviadas</span>
+                        <span id="simCount" class="text-xl font-bold font-mono text-emerald-300 mt-0.5 block">0</span>
                     </div>
+                    <div class="bg-slate-800/80 border border-slate-700/60 p-4 rounded-2xl">
+                        <span class="text-[10px] uppercase font-mono text-slate-400 block">Exitosas (200/202)</span>
+                        <span id="simSuccess" class="text-xl font-bold font-mono text-emerald-400 mt-0.5 block">0</span>
+                    </div>
+                    <div class="bg-slate-800/80 border border-slate-700/60 p-4 rounded-2xl">
+                        <span class="text-[10px] uppercase font-mono text-slate-400 block">Errores / Fallos</span>
+                        <span id="simErrors" class="text-xl font-bold font-mono text-rose-400 mt-0.5 block">0</span>
+                    </div>
+                    <div class="bg-slate-800/80 border border-slate-700/60 p-4 rounded-2xl">
+                        <span class="text-[10px] uppercase font-mono text-slate-400 block">Última Latencia</span>
+                        <span id="simLatency" class="text-xl font-bold font-mono text-amber-300 mt-0.5 block">0 ms</span>
+                    </div>
+                </div>
+            </div>
 
-                    <!-- Botón Principal -->
-                    <button onclick="enviarLiquidacion()" class="w-full bg-emerald-800 hover:bg-emerald-900 active:bg-emerald-950 text-white font-semibold py-3 sm:py-3.5 rounded-xl sm:rounded-2xl transition shadow-xs text-xs tracking-wide mt-2">
-                        Enviar Liquidación (POST)
+            <!-- Configuración API Gateway & Payload JSON -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <!-- Configuración de Conexión -->
+                <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-xs space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">1. Configuración API Gateway</h2>
+                        <span class="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100">Terraform / AWS</span>
+                    </div>
+                    <p class="text-xs text-slate-500 leading-relaxed">URL base del API Gateway de AWS configurada para recibir liquidaciones asíncronas.</p>
+                    <input type="text" id="apiUrl" placeholder="https://tu-api-gateway-url.amazonaws.com" 
+                           class="w-full px-4 py-3 bg-slate-50/70 border border-slate-200/80 rounded-2xl focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 focus:bg-white outline-none text-xs font-mono text-slate-700 transition break-all" 
+                           value="https://fjhe2uxxlh.execute-api.us-east-1.amazonaws.com">
+                    <button onclick="mostrarToast('URL de API Gateway guardada correctamente.', 'success')" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition">
+                        Guardar Configuración
                     </button>
                 </div>
-            </section>
 
-            <!-- Columna Derecha: Vista Previa JSON + Consola Servidor (5/12) -->
-            <section class="lg:col-span-5 flex flex-col gap-4 sm:gap-6">
-
-                <!-- Preview Payload -->
-                <div class="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-100 shadow-xs space-y-3">
+                <!-- Payload JSON en vivo -->
+                <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-xs space-y-4">
                     <div class="flex items-center justify-between">
-                        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">3. Payload JSON</h2>
-                        <span class="text-[10px] font-mono text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">Request Body</span>
+                        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">2. Vista Previa Payload JSON</h2>
+                        <span class="text-[10px] font-mono text-slate-400 bg-slate-100 px-2.5 py-0.5 rounded-full">Request Body</span>
                     </div>
-                    <pre id="jsonPreview" class="bg-slate-900 text-emerald-300 p-3.5 sm:p-4 rounded-xl sm:rounded-2xl text-[11px] sm:text-xs font-mono overflow-x-auto h-40 sm:h-44 border border-slate-800 leading-relaxed"></pre>
+                    <pre id="jsonPreview" class="bg-slate-900 text-emerald-300 p-4 rounded-2xl text-[11px] font-mono overflow-x-auto h-36 border border-slate-800 leading-relaxed"></pre>
                 </div>
 
-                <!-- Response Box -->
-                <div class="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-100 shadow-xs space-y-3 flex-1 flex flex-col">
-                    <div class="flex items-center justify-between">
-                        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">Respuesta del Servidor</h2>
-                        <span class="text-[10px] font-mono text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">Response Logs</span>
-                    </div>
-                    <div id="responseBox" class="bg-slate-50 border border-slate-200/80 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 text-[11px] sm:text-xs font-mono flex-1 min-h-[150px] sm:min-h-[180px] overflow-y-auto text-slate-500 leading-relaxed break-words">
-                        Esperando peticiones...
-                    </div>
+            </div>
+
+            <!-- Consola de Logs Detallados del Servidor -->
+            <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-xs space-y-4 flex flex-col">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">3. Consola de Respuestas y Logs del Servidor</h2>
+                    <button onclick="document.getElementById('responseBox').innerText = 'Consola de logs limpiada...'" class="text-[11px] text-slate-400 hover:text-slate-600 underline">Limpiar Consola</button>
                 </div>
+                <div id="responseBox" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 text-[11px] font-mono flex-1 min-h-[220px] overflow-y-auto text-emerald-400 leading-relaxed break-words">
+                    Esperando peticiones POST al API Gateway...
+                </div>
+            </div>
 
-            </section>
+        </div>
 
+    </div>
+
+    <!-- MODAL DE RECIBO DIGITAL / COMPROBANTE OFICIAL -->
+    <div id="modalRecibo" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+        <div class="bg-white max-w-lg w-full rounded-3xl shadow-2xl overflow-hidden border border-emerald-100 animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
+            <div class="bg-emerald-900 text-white p-6 text-center relative">
+                <button onclick="cerrarRecibo()" class="absolute top-4 right-4 text-emerald-300 hover:text-white p-1 rounded-full">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+                <div class="w-12 h-12 bg-emerald-800 rounded-2xl mx-auto flex items-center justify-center mb-3 text-emerald-200 shadow-inner">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <h3 class="text-lg font-bold">Comprobante de Liquidación</h3>
+                <p class="text-xs text-emerald-200 mt-0.5">AgroLink Andes - Sistema de Trazabilidad y Pagos</p>
+            </div>
+
+            <div id="reciboContenido" class="p-6 space-y-4 overflow-y-auto text-xs text-slate-600 font-mono">
+                <!-- Inyectado dinámicamente -->
+            </div>
+
+            <div class="p-4 bg-slate-50 border-t border-slate-100 flex gap-3">
+                <button onclick="copiarReciboTexto()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-3 rounded-xl transition text-xs flex items-center justify-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                    Copiar Comprobante
+                </button>
+                <button onclick="cerrarRecibo()" class="flex-1 bg-emerald-800 hover:bg-emerald-900 text-white font-semibold py-3 rounded-xl transition text-xs">
+                    Cerrar Ventana
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- MANTENIENDO 100% TU CÓDIGO Y LÓGICA JAVASCRIPT -->
+    <!-- LÓGICA JAVASCRIPT COMPLETA Y ROBUSTA -->
     <script>
+        // Variables de estado global
+        let simuladorInterval = null;
+        let simStats = { count: 0, success: 0, errors: 0, lastLatency: 0 };
+
+        // Inicializar fecha y ID al cargar
         document.getElementById('fecha_entrega').valueAsDate = new Date();
         generarId();
+        cargarHistorialLocal();
+        actualizarEstadisticasDashboard();
 
+        // Control de Pestañas Principales
+        function switchTab(tabId) {
+            ['negocio', 'tecnica'].forEach(id => {
+                const content = document.getElementById('tabContent-' + id);
+                const btn = document.getElementById('tabBtn-' + id);
+                if (content && btn) {
+                    if (id === tabId) {
+                        content.classList.remove('hidden');
+                        if (id === 'negocio') {
+                            btn.className = "flex-1 md:flex-initial px-4 py-2.5 rounded-xl font-semibold text-xs transition bg-white text-emerald-900 shadow-xs flex items-center justify-center gap-2";
+                        } else {
+                            btn.className = "flex-1 md:flex-initial px-4 py-2.5 rounded-xl font-semibold text-xs transition bg-slate-800 text-white shadow-xs flex items-center justify-center gap-2";
+                        }
+                    } else {
+                        content.classList.add('hidden');
+                        btn.className = "flex-1 md:flex-initial px-4 py-2.5 rounded-xl font-semibold text-xs transition text-slate-600 hover:text-slate-900 flex items-center justify-center gap-2";
+                    }
+                }
+            });
+        }
+
+        // Generar ID único
         function generarId() {
             document.getElementById('id_liquidacion').value = 'liq-' + Math.random().toString(36).substring(2, 9);
             actualizarPreview();
         }
 
+        // Precios sugeridos según producto
+        function actualizarPrecioSugerido() {
+            const producto = document.getElementById('producto').value;
+            const precioInput = document.getElementById('precio_kg');
+            if (producto === 'Cafe') precioInput.value = "3.20";
+            if (producto === 'Cacao') precioInput.value = "2.80";
+            if (producto === 'Quinua') precioInput.value = "1.90";
+            calcularTotal();
+        }
+
+        // Obtener datos del formulario de negocio
         function obtenerDatosFormulario() {
             return {
                 id_liquidacion: document.getElementById('id_liquidacion').value.trim(),
@@ -180,33 +423,211 @@
             };
         }
 
+        // Calcular total en tiempo real
         function calcularTotal() {
-            const data = obtenerDatosFormulario();
-            const total = (data.cantidad_kg * data.precio_kg) - data.descuentos;
+            const cantidad = parseFloat(document.getElementById('cantidad_kg').value) || 0;
+            const precioStr = document.getElementById('precio_kg').value.replace(',', '.');
+            const precio = parseFloat(precioStr) || 0;
+            const descuentos = parseFloat(document.getElementById('descuentos').value.replace(',', '.')) || 0;
+            const total = (cantidad * precio) - descuentos;
             document.getElementById('lbl_valor_estimado').innerText = '$' + total.toFixed(2);
-            actualizarPreview();
         }
 
+        // Actualizar vista previa JSON
         function actualizarPreview() {
             const data = obtenerDatosFormulario();
-            document.getElementById('jsonPreview').innerText = JSON.stringify(data, null, 2);
+            const previewEl = document.getElementById('jsonPreview');
+            if (previewEl) {
+                previewEl.innerText = JSON.stringify(data, null, 2);
+            }
         }
 
+        // Notificaciones Toast (Sin usar alert nativo)
+        function mostrarToast(mensaje, tipo = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            let bgClass = "bg-emerald-900 text-white";
+            if (tipo === 'error') bgClass = "bg-rose-900 text-white";
+            if (tipo === 'warning') bgClass = "bg-amber-800 text-white";
+
+            toast.className = `${bgClass} p-4 rounded-2xl shadow-xl text-xs font-medium flex items-center justify-between gap-3 pointer-events-auto transition transform translate-y-2 opacity-0 duration-300`;
+            toast.innerHTML = `<span>${mensaje}</span>`;
+            
+            container.appendChild(toast);
+            setTimeout(() => { toast.classList.remove('translate-y-2', 'opacity-0'); }, 10);
+            setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // Guardar en Local Storage
+        function guardarEnHistorialLocal(payload, httpStatus, respuestaServidor) {
+            let historial = [];
+            try {
+                historial = JSON.parse(localStorage.getItem('agrolink_historial')) || [];
+            } catch(e) { historial = []; }
+
+            const item = {
+                ...payload,
+                totalNeto: ((payload.cantidad_kg * payload.precio_kg) - payload.descuentos).toFixed(2),
+                httpStatus: httpStatus,
+                estadoServidor: (httpStatus >= 200 && httpStatus < 300) ? 'Completado' : 'Error',
+                fechaRegistro: new Date().toLocaleTimeString()
+            };
+
+            historial = historial.filter(h => h.id_liquidacion !== payload.id_liquidacion);
+            historial.unshift(item);
+            if (historial.length > 30) historial.pop();
+
+            localStorage.setItem('agrolink_historial', JSON.stringify(historial));
+            cargarHistorialLocal();
+            actualizarEstadisticasDashboard();
+        }
+
+        // Cargar historial en la pestaña de negocio
+        function cargarHistorialLocal() {
+            const contenedor = document.getElementById('listaHistorialNegocio');
+            if (!contenedor) return;
+
+            let historial = [];
+            try {
+                historial = JSON.parse(localStorage.getItem('agrolink_historial')) || [];
+            } catch(e) { historial = []; }
+
+            if (historial.length === 0) {
+                contenedor.innerHTML = `<div class="p-6 text-center text-slate-400 bg-slate-50 rounded-2xl text-xs">No hay entregas registradas todavía.</div>`;
+                return;
+            }
+
+            contenedor.innerHTML = '';
+            historial.slice(0, 10).forEach((item) => {
+                const div = document.createElement('div');
+                div.className = "p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between gap-3 hover:bg-slate-100/70 transition";
+                
+                div.innerHTML = `
+                    <div class="space-y-0.5">
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-slate-800 text-xs">${item.id_liquidacion}</span>
+                            <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-medium">${item.producto}</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500">Prod: ${item.id_productor} • ${item.cantidad_kg} Kg</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs font-bold font-mono text-emerald-900 block">$${item.totalNeto}</span>
+                        <button onclick='verReciboGuardado(${JSON.stringify(item)})' class="text-[10px] text-emerald-700 font-semibold hover:underline mt-0.5 inline-block">Ver Recibo</button>
+                    </div>
+                `;
+                contenedor.appendChild(div);
+            });
+        }
+
+        function limpiarHistorial() {
+            if (confirm("¿Estás seguro de limpiar el historial guardado?")) {
+                localStorage.removeItem('agrolink_historial');
+                cargarHistorialLocal();
+                actualizarEstadisticasDashboard();
+                mostrarToast("Historial local borrado.", "warning");
+            }
+        }
+
+        // Actualizar estadísticas del dashboard de negocio
+        function actualizarEstadisticasDashboard() {
+            let historial = [];
+            try {
+                historial = JSON.parse(localStorage.getItem('agrolink_historial')) || [];
+            } catch(e) { historial = []; }
+
+            let totalMonto = 0;
+            let totalKilos = 0;
+            let totalEntregas = historial.length;
+
+            historial.forEach(h => {
+                totalMonto += parseFloat(h.totalNeto) || 0;
+                totalKilos += parseFloat(h.cantidad_kg) || 0;
+            });
+
+            const mEl = document.getElementById('statTotalMonto');
+            const kEl = document.getElementById('statTotalKilos');
+            const eEl = document.getElementById('statTotalEntregas');
+
+            if (mEl) mEl.innerText = '$' + totalMonto.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            if (kEl) kEl.innerText = totalKilos.toLocaleString() + ' Kg';
+            if (eEl) eEl.innerText = totalEntregas;
+        }
+
+        // Mostrar Comprabante / Recibo Digital
+        function mostrarReciboDigital(payload, httpStatus, jsonRes) {
+            const modal = document.getElementById('modalRecibo');
+            const contenido = document.getElementById('reciboContenido');
+            const totalNeto = ((payload.cantidad_kg * payload.precio_kg) - payload.descuentos).toFixed(2);
+
+            contenido.innerHTML = `
+                <div class="space-y-2 border-b border-dashed border-slate-200 pb-3">
+                    <div class="flex justify-between"><span>Código Liquidación:</span><span class="font-bold text-slate-800">${payload.id_liquidacion}</span></div>
+                    <div class="flex justify-between"><span>Productor:</span><span>${payload.id_productor}</span></div>
+                    <div class="flex justify-between"><span>Centro de Acopio:</span><span>${payload.id_centro_acopio}</span></div>
+                    <div class="flex justify-between"><span>Fecha de Cosecha:</span><span>${payload.fecha_entrega}</span></div>
+                </div>
+                <div class="space-y-2 border-b border-dashed border-slate-200 py-3">
+                    <div class="flex justify-between"><span>Producto Agrícola:</span><span class="font-bold">${payload.producto}</span></div>
+                    <div class="flex justify-between"><span>Cantidad Recibida:</span><span>${payload.cantidad_kg} Kg</span></div>
+                    <div class="flex justify-between"><span>Precio por Kg:</span><span>$${payload.precio_kg.toFixed(2)}</span></div>
+                    <div class="flex justify-between"><span>Deducciones / Anticipos:</span><span>-$${payload.descuentos.toFixed(2)}</span></div>
+                </div>
+                <div class="pt-2 space-y-1">
+                    <div class="flex justify-between text-sm font-bold text-emerald-900"><span>TOTAL NETO A PAGAR:</span><span>$${totalNeto}</span></div>
+                    <div class="flex justify-between text-[10px] text-slate-400 pt-2"><span>Estado Transacción:</span><span class="text-emerald-700 font-semibold">Procesado Asíncronamente (${httpStatus})</span></div>
+                </div>
+            `;
+            modal.classList.remove('hidden');
+        }
+
+        function verReciboGuardado(item) {
+            mostrarReciboDigital(item, item.httpStatus || 200, { mensaje: "Recuperado del almacenamiento local" });
+        }
+
+        function cerrarRecibo() {
+            document.getElementById('modalRecibo').classList.add('hidden');
+        }
+
+        function copiarReciboTexto() {
+            const contenido = document.getElementById('reciboContenido').innerText;
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = "=== COMPROBANTE AGROLINK ANDES ===\n\n" + contenido;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            try {
+                document.execCommand('copy');
+                mostrarToast("Comprobante copiado al portapapeles.", "success");
+            } catch (e) {
+                mostrarToast("No se pudo copiar automáticamente.", "error");
+            }
+            document.body.removeChild(tempTextArea);
+        }
+
+        // Función Principal POST al API Gateway (LÓGICA ORIGINAL PRESERVADA)
         async function enviarLiquidacion() {
             const baseUrl = document.getElementById('apiUrl').value.trim();
             const responseBox = document.getElementById('responseBox');
+            const btnEnviar = document.getElementById('btnEnviar');
 
             if (!baseUrl) {
-                alert("Por favor, ingresa primero la URL del API Gateway en la configuración.");
+                mostrarToast("Por favor, configure primero la URL del API Gateway en la Consola Técnica.", "warning");
+                switchTab('tecnica');
                 return;
             }
 
             const url = baseUrl.endsWith('/') ? baseUrl + 'liquidaciones' : baseUrl + '/liquidaciones';
             const payload = obtenerDatosFormulario();
 
-            // Estado cargando
-            responseBox.className = "bg-slate-100 border border-slate-300 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 text-[11px] sm:text-xs font-mono flex-1 min-h-[150px] sm:min-h-[180px] overflow-y-auto text-slate-700 break-words";
-            responseBox.innerText = "Enviando solicitud POST a API Gateway...";
+            btnEnviar.disabled = true;
+            btnEnviar.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Procesando pago...`;
+            
+            if (responseBox) {
+                responseBox.innerText = "Enviando solicitud POST a API Gateway (" + url + ")...\nPayload:\n" + JSON.stringify(payload, null, 2);
+            }
 
             try {
                 const startTime = performance.now();
@@ -225,24 +646,128 @@
                     jsonRes = { rawResponse: "Respuesta no es un JSON válido" };
                 }
 
-                // Estilizado según el código de respuesta HTTP
-                if (res.ok || res.status === 202) {
-                    responseBox.className = "bg-emerald-50/90 border border-emerald-200 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 text-[11px] sm:text-xs font-mono flex-1 min-h-[150px] sm:min-h-[180px] overflow-y-auto text-emerald-950 break-words";
-                } else if (res.status >= 400 && res.status < 500) {
-                    responseBox.className = "bg-amber-50/90 border border-amber-200 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 text-[11px] sm:text-xs font-mono flex-1 min-h-[150px] sm:min-h-[180px] overflow-y-auto text-amber-950 break-words";
-                } else {
-                    responseBox.className = "bg-rose-50/90 border border-rose-200 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 text-[11px] sm:text-xs font-mono flex-1 min-h-[150px] sm:min-h-[180px] overflow-y-auto text-rose-950 break-words";
+                if (responseBox) {
+                    responseBox.innerText = `Estado HTTP: ${res.status} ${res.statusText || ''} (${latency} ms)\n\n` + 
+                                            JSON.stringify(jsonRes, null, 2);
                 }
 
-                responseBox.innerText = `Estado HTTP: ${res.status} ${res.statusText || ''} (${latency} ms)\n\n` + 
-                                        JSON.stringify(jsonRes, null, 2);
+                guardarEnHistorialLocal(payload, res.status, jsonRes);
+
+                if (res.ok || res.status === 202) {
+                    mostrarToast("¡Liquidación procesada y emitida con éxito!", "success");
+                    mostrarReciboDigital(payload, res.status, jsonRes);
+                    generarId(); // Generar nuevo ID para la siguiente entrega
+                } else {
+                    mostrarToast(`El servidor respondió con estado ${res.status}`, "warning");
+                }
 
             } catch (error) {
-                responseBox.className = "bg-rose-50/90 border border-rose-200 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 text-[11px] sm:text-xs font-mono flex-1 min-h-[150px] sm:min-h-[180px] overflow-y-auto text-rose-950 break-words";
-                responseBox.innerText = "Error de red o CORS:\n" + error.message;
+                if (responseBox) {
+                    responseBox.innerText = "Error de red o CORS:\n" + error.message;
+                }
+                mostrarToast("Error de conexión con el servidor AWS.", "error");
+                guardarEnHistorialLocal(payload, 0, { error: error.message });
+            } finally {
+                btnEnviar.disabled = false;
+                btnEnviar.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Procesar y Emitir Liquidación de Pago`;
             }
         }
 
+        // SIMULADOR DE CARGA AUTOMÁTICA (Cada 2 segundos, valores aleatorios realistas)
+        function toggleSimulador() {
+            const btnText = document.getElementById('simuladorBtnText');
+            const indicator = document.getElementById('simuladorIndicator');
+
+            if (simuladorInterval) {
+                clearInterval(simuladorInterval);
+                simuladorInterval = null;
+                btnText.innerText = "Iniciar Simulador (2s)";
+                indicator.className = "inline-block w-2.5 h-2.5 rounded-full bg-slate-500";
+                mostrarToast("Simulador automático detenido.", "warning");
+            } else {
+                const baseUrl = document.getElementById('apiUrl').value.trim();
+                if (!baseUrl) {
+                    mostrarToast("Por favor configure la URL del API Gateway primero.", "warning");
+                    switchTab('tecnica');
+                    return;
+                }
+
+                btnText.innerText = "Detener Simulador";
+                indicator.className = "inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse";
+                mostrarToast("Simulador automático iniciado (1 petición cada 2s).", "success");
+
+                simuladorInterval = setInterval(async () => {
+                    const productos = [
+                        { nombre: "Cafe", precioMin: 3.0, precioMax: 3.8 },
+                        { nombre: "Cacao", precioMin: 2.5, precioMax: 3.2 },
+                        { nombre: "Quinua", precioMin: 1.8, precioMax: 2.4 }
+                    ];
+                    const prodAleatorio = productos[Math.floor(Math.random() * productos.length)];
+                    const cantAleatoria = Math.floor(Math.random() * 650) + 50;
+                    const precioAleatorio = parseFloat((Math.random() * (prodAleatorio.precioMax - prodAleatorio.precioMin) + prodAleatorio.precioMin).toFixed(2));
+                    const descuentoAleatorio = parseFloat((Math.random() * 15).toFixed(2));
+
+                    const payloadAleatorio = {
+                        id_liquidacion: 'sim-' + Math.random().toString(36).substring(2, 8),
+                        id_productor: 'prod-' + (Math.floor(Math.random() * 900) + 1000),
+                        id_centro_acopio: ['acopio-norte', 'acopio-sur', 'acopio-oriente'][Math.floor(Math.random() * 3)],
+                        fecha_entrega: new Date().toISOString().split('T')[0],
+                        producto: prodAleatorio.nombre,
+                        cantidad_kg: cantAleatoria,
+                        precio_kg: precioAleatorio,
+                        descuentos: descuentoAleatorio
+                    };
+
+                    simStats.count++;
+                    document.getElementById('simCount').innerText = simStats.count;
+
+                    const url = baseUrl.endsWith('/') ? baseUrl + 'liquidaciones' : baseUrl + '/liquidaciones';
+                    const responseBox = document.getElementById('responseBox');
+
+                    try {
+                        const startTime = performance.now();
+                        const res = await fetch(url, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payloadAleatorio)
+                        });
+                        const endTime = performance.now();
+                        const latency = (endTime - startTime).toFixed(0);
+
+                        simStats.lastLatency = latency;
+                        document.getElementById('simLatency').innerText = latency + ' ms';
+
+                        let jsonRes;
+                        try { jsonRes = await res.json(); } catch(e) { jsonRes = { status: "OK" }; }
+
+                        if (res.ok || res.status === 202) {
+                            simStats.success++;
+                            document.getElementById('simSuccess').innerText = simStats.success;
+                        } else {
+                            simStats.errors++;
+                            document.getElementById('simErrors').innerText = simStats.errors;
+                        }
+
+                        if (responseBox) {
+                            responseBox.innerText = `[SIMULADOR AUTO - ${new Date().toLocaleTimeString()}] HTTP ${res.status} (${latency}ms)\n` +
+                                                    `Enviado: ${JSON.stringify(payloadAleatorio)}\n` +
+                                                    `Respuesta: ${JSON.stringify(jsonRes)}\n\n` + responseBox.innerText;
+                        }
+
+                        guardarEnHistorialLocal(payloadAleatorio, res.status, jsonRes);
+
+                    } catch (err) {
+                        simStats.errors++;
+                        document.getElementById('simErrors').innerText = simStats.errors;
+                        if (responseBox) {
+                            responseBox.innerText = `[SIMULADOR ERROR - ${new Date().toLocaleTimeString()}] ${err.message}\n\n` + responseBox.innerText;
+                        }
+                    }
+                }, 2000);
+            }
+        }
+
+        // Ejecutar cálculos iniciales
         calcularTotal();
     </script>
 </body>

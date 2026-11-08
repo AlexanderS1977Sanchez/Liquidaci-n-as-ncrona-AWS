@@ -3,68 +3,103 @@ import httpx
 import time
 import random
 
-# URL de tu API Gateway expuesta en AWS
-URL = "https://kszuswykvl.execute-api.us-east-1.amazonaws.com/liquidaciones"
+URL = "https://example.execute-api.us-east-1.amazonaws.com/liquidaciones"
 
-# Límite de concurrencia simultánea para no saturar los sockets de Windows
-SEMAPHORE_LIMIT = 50 
+TOTAL_REQUESTS = 1000      # Número total de peticiones
+REQUEST_DELAY = 2.0        # Segundos exactos de espera entre cada petición
 
-async def send_request(client, index, semaphore):
-    async with semaphore:
+# Lista para almacenar IDs generados previamente y poder reutilizarlos en los duplicados
+generated_ids = []
+
+def generate_payload(index):
+    # Se ajustan las opciones y pesos: % normal, % duplicado, % negativo
+    tipo = random.choices(["normal", "duplicado", "negativo"], weights=[0.70, 0.01, 0.29])[0]
+    
+    if tipo == "normal":
+        id_liq = f"liq-norm-{index}-{random.randint(100, 999)}"
+        generated_ids.append(id_liq)
         payload = {
-            "id_liquidacion": f"liq-load-{index}-{random.randint(100, 999)}",
+            "id_liquidacion": id_liq,
             "id_productor": "prod-1043",
             "id_centro_acopio": "acopio-norte",
             "fecha_entrega": "2026-10-22",
             "producto": "Cacao Fino",
-            "cantidad_kg": 400,
-            "precio_kg": 1.27,
-            "descuentos": 10.1
+            "cantidad_kg": round(random.uniform(100, 500), 2),
+            "precio_kg": round(random.uniform(1.0, 3.0), 2),
+            "descuentos": round(random.uniform(0.0, 15.0), 2)
         }
-        headers = {
-            "Content-Type": "application/json"
+    elif tipo == "duplicado":
+        # Si ya existen IDs previos, selecciona uno al azar; de lo contrario, crea uno base
+        if generated_ids:
+            id_liq = random.choice(generated_ids)
+        else:
+            id_liq = f"liq-dup-base-{index}"
+            generated_ids.append(id_liq)
+            
+        payload = {
+            "id_liquidacion": id_liq,  # ID repetido intencionalmente
+            "id_productor": "prod-1043",
+            "id_centro_acopio": "acopio-norte",
+            "fecha_entrega": "2026-10-22",
+            "producto": "Cacao Fino",
+            "cantidad_kg": round(random.uniform(100, 500), 2),
+            "precio_kg": round(random.uniform(1.0, 3.0), 2),
+            "descuentos": round(random.uniform(0.0, 15.0), 2)
         }
-        
-        try:
-            response = await client.post(URL, json=payload, headers=headers, timeout=20.0)
-            return response.status_code
-        except httpx.TimeoutException:
-            return "Timeout"
-        except Exception as e:
-            return str(e) or "ConnectionError"
+    else:  # "negativo"
+        id_liq = f"liq-neg-{index}"
+        generated_ids.append(id_liq)
+        payload = {
+            "id_liquidacion": id_liq,
+            "id_productor": "prod-1043",
+            "id_centro_acopio": "acopio-norte",
+            "fecha_entrega": "2026-10-22",
+            "producto": "Cacao Fino",
+            "cantidad_kg": -random.randint(10, 500),
+            "precio_kg": -round(random.uniform(0.5, 5.0), 2),
+            "descuentos": -5.0
+        }
+    
+    return tipo, payload
 
 async def main():
-    total_requests = 1000
-    print(f"🚀 Iniciando prueba controlada: enviando {total_requests} peticiones (concurrencia de {SEMAPHORE_LIMIT})...")
+    print(f" Iniciando envío secuencial de {TOTAL_REQUESTS} peticiones (1 cada {REQUEST_DELAY} segundos)...\n")
     start_time = time.time()
-
-    semaphore = asyncio.Semaphore(SEMAPHORE_LIMIT)
     
-    # Configuramos un cliente HTTP con límites estables de conexiones
-    limits = httpx.Limits(max_keepalive_connections=50, max_connections=100)
+    results = []
     
-    async with httpx.AsyncClient(limits=limits) as client:
-        tasks = [send_request(client, i, semaphore) for i in range(total_requests)]
-        results = await asyncio.gather(*tasks)
+    async with httpx.AsyncClient() as client:
+        for i in range(TOTAL_REQUESTS):
+            index = i + 1
+            tipo, payload = generate_payload(index)
+            headers = {"Content-Type": "application/json"}
+            
+            try:
+                response = await client.post(URL, json=payload, headers=headers, timeout=20.0)
+                resultado = response.status_code
+            except httpx.TimeoutException:
+                resultado = "Timeout"
+            except Exception as e:
+                resultado = str(e) or "ConnectionError"
+                
+            print(f"Petición {index} [{tipo}] -> Resultado: {resultado}")
+            results.append(resultado)
+            
+            # Espera 2 segundos exactos ANTES de pasar a la siguiente petición (excepto en la última)
+            if index < TOTAL_REQUESTS:
+                await asyncio.sleep(REQUEST_DELAY)
 
     end_time = time.time()
     total_time = end_time - start_time
     
-    # Análisis de resultados
-    success_count = results.count(202)
-    print("\n========================================")
-    print("📊 RESULTADOS DE LA PRUEBA DE CARGA")
-    print("========================================")
-    print(f"⏱️ Tiempo total transcurrido: {total_time:.2f} segundos")
-    print(f"⚡ Peticiones por segundo: {total_requests / total_time:.2f} req/s")
-    print(f"✅ Peticiones exitosas (202 Accepted): {success_count} / {total_requests}")
+    # Análisis final de resultados
+    print("RESULTADOS FINALES DE LA PRUEBA")
+    print(f"Tiempo total transcurrido: {total_time:.2f} segundos")
     
-    other_results = {x: results.count(x) for x in set(results) if x != 202}
-    if other_results:
-        print(f"⚠️ Errores detectados: {other_results}")
-    else:
-        print("🎉 ¡Excelente! Todas las peticiones fueron procesadas con éxito por API Gateway.")
-    print("========================================")
+    unique_results = set(results)
+    for code in sorted(unique_results, key=lambda x: str(x) if isinstance(x, int) else str(x)):
+        count = results.count(code)
+        print(f"• Respuesta '{code}': {count} peticiones")
 
 if __name__ == "__main__":
     asyncio.run(main())

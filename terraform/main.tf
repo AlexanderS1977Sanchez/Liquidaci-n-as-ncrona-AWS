@@ -1,3 +1,5 @@
+data "aws_caller_identity" "current" {}
+
 provider "aws" {
   region = var.aws_region
 
@@ -8,11 +10,6 @@ provider "aws" {
       Owner       = "Jorge Sanchez"
     }
   }
-}
-
-# 1. Obtener el rol preexistente LabRole de AWS Academy
-data "aws_iam_role" "lab_role" {
-  name = "LabRole"
 }
 
 # 2. Base de datos DynamoDB para persistencia e idempotencia
@@ -60,8 +57,7 @@ data "archive_file" "consumer_zip" {
 resource "aws_lambda_function" "producer" {
   filename         = data.archive_file.producer_zip.output_path
   function_name    = "agrolink-producer-${var.environment}"
-  role            = data.aws_iam_role.lab_role.arn
-  #role             = aws_iam_role.producer_role.arn
+  role             = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/LabRole"
   handler          = "index.handler"
   runtime          = "nodejs18.x"
   source_code_hash = data.archive_file.producer_zip.output_base64sha256
@@ -77,8 +73,7 @@ resource "aws_lambda_function" "producer" {
 resource "aws_lambda_function" "consumer" {
   filename         = data.archive_file.consumer_zip.output_path
   function_name    = "agrolink-consumer-${var.environment}"
-  role            = data.aws_iam_role.lab_role.arn
-  #role             = aws_iam_role.consumer_role.arn
+  role             = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/LabRole"
   handler          = "index.handler"
   runtime          = "nodejs18.x"
   source_code_hash = data.archive_file.consumer_zip.output_base64sha256
@@ -138,14 +133,26 @@ resource "aws_lambda_permission" "api_gw" {
   source_arn    = "${aws_apigatewayv2_api.http_api.execution_arn}/*/*"
 }
 
-# 10. Alarma de CloudWatch para la DLQ
+# 10. Tópico de SNS para notificaciones por correo de la DLQ
+resource "aws_sns_topic" "alertas_dlq_topic" {
+  name = "agrolink-dlq-alerts-${var.environment}"
+}
+
+# 11. Suscripción de correo electrónico al Tópico SNS (Recuerda aceptar el correo de confirmación)
+resource "aws_sns_topic_subscription" "email_subscription" {
+  topic_arn = aws_sns_topic.alertas_dlq_topic.arn
+  protocol  = "email"
+  endpoint  = "jasanchezc3@gmail.com"
+}
+
+# 12. Alarma de CloudWatch para la DLQ conectada a las alertas de correo (SNS)
 resource "aws_cloudwatch_metric_alarm" "dlq_messages_alarm" {
   alarm_name          = "agrolink-dlq-messages-alarm"
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = "1"
   metric_name         = "ApproximateNumberOfMessagesVisible"
   namespace           = "AWS/SQS"
-  period              = "60"
+  period              = "10"
   statistic           = "Sum"
   threshold           = "1"
   alarm_description   = "Alarma: Hay mensajes retenidos en la DLQ debido a errores de procesamiento."
@@ -153,4 +160,7 @@ resource "aws_cloudwatch_metric_alarm" "dlq_messages_alarm" {
   dimensions = {
     QueueName = aws_sqs_queue.dlq.name 
   }
+
+  # Conecta la alarma para disparar el envío hacia el SNS Topic configurado
+  alarm_actions = [aws_sns_topic.alertas_dlq_topic.arn]
 }
