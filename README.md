@@ -50,7 +50,7 @@ An enterprise-grade, event-driven serverless architecture designed for high-thro
 
 The system decouples immediate HTTP API ingestion from backend accounting calculations and persistent database storage:
 
-1. **API Gateway (HTTP v2):** Exposes public REST endpoints with sub-300ms SLA.
+1. **API Gateway (HTTP v2):** Exposes public REST endpoints.
 2. **Lambda Producer:** Performs fast-path JSON payload validation, generates timestamps, and enqueues messages to SQS, returning an immediate `202 Accepted` response.
 3. **Amazon SQS (Main Buffer):** Absorbs high-concurrency spikes during harvest peak hours, preventing downstream service degradation.
 4. **Lambda Consumer:** Batch-processes events, computes net values, and writes to DynamoDB with conditional logic.
