@@ -112,12 +112,12 @@ Calculated using the official **AWS Pricing Calculator** (`us-east-1` region) ba
 
 | Service | Configured Metric | Monthly Consumption | Estimated Cost (USD) |
 | :--- | :--- | :--- | :--- |
-| **API Gateway** | HTTP API Requests | 50,000 calls / month | $0.00 USD (Free Tier) |
-| **AWS Lambda** | Compute Duration (256 MB) | 100,000 invocations | $0.00 USD (Free Tier) |
-| **Amazon SQS** | API Actions | 150,000 requests | $0.00 USD (Free Tier) |
-| **Amazon DynamoDB** | On-Demand Reads/Writes | 50k PutItem / 50k Reads | $0.07 USD |
-| **Amazon CloudWatch**| Logs (0.2 GB) + 1 Alarm | Continuous monitoring | $0.20 USD |
-| **TOTAL** | **Full Serverless Architecture** | **Monthly Estimate** | **~$0.27 USD / month** |
+| **API Gateway** | HTTP API Requests | 50,000 calls / month | $0.05 USD |
+| **AWS Lambda** | Compute Duration (256 MB) | 100,000 invocations | $0.07 USD |
+| **Amazon SQS** | API Actions | 150,000 requests | $0.32 USD |
+| **Amazon DynamoDB** | On-Demand Reads/Writes | 50k PutItem / 50k Reads | $0.03 USD |
+| **Amazon CloudWatch**| Logs (0.2 GB) + 1 Alarm | Continuous monitoring | $0.13 USD |
+| **TOTAL** | **Full Serverless Architecture** | **Monthly Estimate** | **~$0.60 USD / month** |
 
 ---
 
