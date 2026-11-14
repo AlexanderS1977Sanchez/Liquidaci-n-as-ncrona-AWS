@@ -22,32 +22,6 @@ An enterprise-grade, event-driven serverless architecture designed for high-thro
 
 ---
 
-## 📐 Architecture Overview
-
-```
-                    ┌────────────────────────────────────────────────────────────────────────┐
-                    │                      AWS Cloud Region (us-east-1)                      │
-                    │                                                                        │
-┌──────────────┐    │   ┌─────────────────┐       ┌─────────────────┐      ┌──────────────┐  │
-│  API Client  │───>│──>│   API Gateway   │──────>│ Lambda Producer │─────>│  SQS Buffer  │  │
-│  (REST API)  │<───│───│  (HTTP API v2)  │<──────│  (Ingestion)    │      │ (Main Queue) │  │
-└──────────────┘    │   └─────────────────┘ 202   └─────────────────┘      └──────┬───────┘  │
-   Payload          │                    Accepted                                 │          │
-   Validation       │                                                             │ Event    │
-                    │                                                             ▼ Source   │
-                    │   ┌─────────────────┐       ┌─────────────────┐      ┌──────────────┐  │
-                    │   │ DynamoDB Table  │<──────│ Lambda Consumer │<─────│ Lambda Poll  │  │
-                    │   │  (Liquidaciones)│ Put   │ (Business Logic)│      │ Trigger      │  │
-                    │   └─────────────────┘       └────────┬────────┘      └──────────────┘  │
-                    │                                      │ Max Retries > 3                 │
-                    │                                      ▼                                 │
-                    │                             ┌─────────────────┐      ┌──────────────┐  │
-                    │                             │    SQS DLQ      │─────>│  CloudWatch  │  │
-                    │                             │  (Dead Letter)  │      │  DLQ Alarm   │  │
-                    │                             └─────────────────┘      └──────────────┘  │
-                    └────────────────────────────────────────────────────────────────────────┘
-```
-
 The system decouples immediate HTTP API ingestion from backend accounting calculations and persistent database storage:
 
 1. **API Gateway (HTTP v2):** Exposes public REST endpoints.
